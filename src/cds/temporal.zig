@@ -218,8 +218,8 @@ pub fn hasContinuousEnrollment(
 ) bool {
     if (periods.len == 0) return false;
 
-    // Sort periods by start date (simple insertion sort for typically small arrays).
-    // We work on the assumption periods are already sorted; if not, the caller should sort.
+    // Precondition: periods must be sorted by start date in ascending order.
+    // This function does not perform any sorting; callers are responsible for ordering.
     var covered_through: Date = interval.start;
 
     for (periods) |period| {
