@@ -373,7 +373,11 @@ pub fn generateMeasureReport(
     try w.writeAll("  \"resourceType\": \"MeasureReport\",\n");
     try w.print("  \"status\": \"complete\",\n", .{});
     try w.print("  \"type\": \"summary\",\n", .{});
-    try w.print("  \"measure\": \"Measure/{s}\",\n", .{definition.id});
+    const measure_ref = try std.fmt.allocPrint(allocator, "Measure/{s}", .{definition.id});
+    defer allocator.free(measure_ref);
+    try w.writeAll("  \"measure\": ");
+    try std.json.stringify(measure_ref, .{}, w);
+    try w.writeAll(",\n");
 
     // Period
     var start_buf: [16]u8 = undefined;
@@ -387,7 +391,9 @@ pub fn generateMeasureReport(
 
     // Groups
     try w.writeAll("  \"group\": [{\n");
-    try w.print("    \"code\": {{\"text\": \"{s}\"}},\n", .{definition.title});
+    try w.writeAll("    \"code\": {\"text\": ");
+    try std.json.stringify(definition.title, .{}, w);
+    try w.writeAll("},\n");
 
     // Populations
     try w.writeAll("    \"population\": [\n");
