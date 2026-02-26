@@ -382,8 +382,8 @@ pub fn generateMeasureReport(
     const end_str = result.measurement_period.end.formatDate(&end_buf) catch "unknown";
     try w.print("  \"period\": {{\n    \"start\": \"{s}\",\n    \"end\": \"{s}\"\n  }},\n", .{ start_str, end_str });
 
-    // Date generated
-    try w.writeAll("  \"date\": \"2024-01-01\",\n");
+    // Date generated (use measurement period end)
+    try w.print("  \"date\": \"{s}\",\n", .{end_str});
 
     // Groups
     try w.writeAll("  \"group\": [{\n");
