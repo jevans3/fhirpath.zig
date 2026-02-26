@@ -68,15 +68,38 @@ fn evaluateBCS(ctx: *const measure.PatientContext) measure.PatientResult {
 }
 
 fn hasHistoryTwoUnilateralMastectomies(ctx: *const measure.PatientContext) bool {
-    var count: u32 = 0;
+    var has_left = false;
+    var has_right = false;
+
     for (ctx.resources) |entry| {
         if (!std.mem.eql(u8, entry.resource_type, "Condition") and
             !std.mem.eql(u8, entry.resource_type, "Procedure")) continue;
-        if (cql.codeableConceptInValueSet(entry.json, &valueset.VS_UNILATERAL_MASTECTOMY)) {
-            count += 1;
+
+        if (!cql.codeableConceptInValueSet(entry.json, &valueset.VS_UNILATERAL_MASTECTOMY)) {
+            continue;
+        }
+
+        // Heuristic laterality detection: look for "left"/"right" markers in the JSON.
+        const json_bytes = entry.json;
+
+        if (std.mem.indexOf(u8, json_bytes, "left") != null or
+            std.mem.indexOf(u8, json_bytes, "Left") != null)
+        {
+            has_left = true;
+        }
+
+        if (std.mem.indexOf(u8, json_bytes, "right") != null or
+            std.mem.indexOf(u8, json_bytes, "Right") != null)
+        {
+            has_right = true;
+        }
+
+        if (has_left and has_right) {
+            return true;
         }
     }
-    return count >= 2;
+
+    return has_left and has_right;
 }
 
 /// Cervical Cancer Screening (CCS)
