@@ -124,4 +124,16 @@ pub fn build(b: *std.Build) void {
     wasm.entry = .disabled;
     const wasm_install = b.addInstallArtifact(wasm, .{});
     b.step("wasm", "Build WebAssembly module").dependOn(&wasm_install.step);
+
+    // CDS/HEDIS Quality Measure Engine tests
+    const cds_test_module = b.createModule(.{
+        .root_source_file = b.path("src/cds/tests.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    const cds_tests = b.addTest(.{
+        .root_module = cds_test_module,
+    });
+    const run_cds_tests = b.addRunArtifact(cds_tests);
+    b.step("test-cds", "Run CDS/HEDIS quality measure tests").dependOn(&run_cds_tests.step);
 }
